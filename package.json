@@ -1,0 +1,16 @@
+{
+  "name": "technical-test",
+  "version": "1.0.0",
+  "description": "Solita technical test",
+  "main": "script.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "http-server ./public"
+  },
+  "author": "tuanl",
+  "license": "ISC",
+  "dependencies": {
+    "http-server": "^0.12.3"
+  },
+  "devDependencies": {}
+}
