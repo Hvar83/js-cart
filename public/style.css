@@ -1,0 +1,131 @@
+body {
+    font-size: 16px;
+}
+
+:root {
+    --header-color: #e8e8e8;
+    --white-color: #ffffff;
+    --black-color: #000;
+}
+
+h1, h2, h3, h4, h5 {
+    font-family: 'Courgette', cursive;
+}
+
+h2 {
+    font-size: 2.2rem;
+    margin-bottom: 1rem;
+}
+
+header {
+    color: var(--black-color);
+    background-color: var(--header-color);
+    height: 130px;
+    line-height: 75px;
+    border-bottom: 50px solid var(--white-color)
+}
+
+header::after {
+    display: block;
+    content: "";
+    width: 100%;
+    height: 50px;
+    background: linear-gradient(135deg, #e8e8e8 25%, transparent 25%), linear-gradient(-135deg, #e8e8e8 25%, transparent 25%);
+    background-size: 50px 50px;
+    background-position: 50px;
+    position: absolute;
+    top: 80px;
+    left: 0;
+}
+
+.background-black {
+    background-color: var(--black-color);
+}
+
+.lh35 {
+    line-height: 35px;
+}
+
+.oi {
+    font-size: 25px;
+    color: var(--white-color);
+}
+
+.header-description {
+    font-family: 'Courgette', cursive;
+}
+
+.cart {
+    text-align: right;
+}
+
+.circle-button {
+    height: 45px;
+    width: 45px;
+    -webkit-border-radius: 45px;
+    -moz-border-radius: 45px;
+    border-radius: 45px;
+    display: inline-flex;
+    justify-content: center;
+    border: 1px solid var(--black-color)
+}
+
+.circle-button:hover {
+    cursor: pointer;
+    background-color: var(--white-color);
+    border: 1px solid var(--black-color);
+    transition: all .2s ease-in-out;
+}
+
+.circle-button:hover .oi {
+    color: var(--black-color)
+}
+
+.list-items {
+    margin: 2rem auto;
+}
+
+.product-item {
+    margin-bottom: 3rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--header-color);
+}
+
+.product-item:last-child {
+    margin-bottom: 0;
+}
+
+.price {
+    display:block;
+    font-size: 1.5rem;
+    font-family: 'Courguette', cursive;
+    margin-bottom: 5px;
+}
+
+.add-to-chart {
+    border: 1px solid black;
+    color: white;
+    text-transform: uppercase;
+    font-size: 1rem;
+    padding: 5px 10px;
+}
+
+.add-to-chart:hover {
+    cursor: pointer;
+    background-color: var(--white-color);
+    color: var(--black-color);
+    transition: all .2s ease-in-out;
+}
+
+.product-image {
+    margin: 0 auto;
+    display: block;
+    max-width: 50%;
+}
+
+@media only screen and (max-width: 767px) {
+    .add-to-chart {
+        display: block;
+        margin: 0 auto;
+    }
+  }

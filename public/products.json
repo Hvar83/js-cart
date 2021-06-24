@@ -1,0 +1,41 @@
+{
+    "settings": {
+        "size": ["big", "medium", "small", "extrasmall"],
+        "color": ["black", "red", "yellow", "green", "pink", "blue", "brown"]
+    },
+    "results": [
+        {
+            "name": "Triangle",
+            "price": 1009.00,
+            "discount": null,
+            "image": "triangle.png",
+            "description": "A true classic with three elegant corners.",
+            "options": {
+                "color": ["red", "yellow", "pink"],
+                "size": ["big", "small"]
+            }
+        },
+        {
+            "name": "Rectangle",
+            "price": 899.00,
+            "discount": 20,
+            "image": "rectangle.png",
+            "description": "For once, it's a great idea to think inside the box.",
+            "options": {
+                "color": ["red", "green", "pink"],
+                "size": ["big", "extrasmall"]
+            }
+        },
+        {
+            "name": "Circle",
+            "price": 999.00,
+            "discount": null,
+            "image": "circle.png",
+            "description": "Perfect choise when you don't need any corners.",
+            "options": {
+                "color": ["black", "yellow", "pink"],
+                "size": ["medium", "small"]
+            }
+        }
+    ]
+}
