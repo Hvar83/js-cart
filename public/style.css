@@ -59,6 +59,49 @@ header::after {
     text-align: right;
 }
 
+.cart-button {
+    position: relative;
+}
+
+.cart-button:before {
+    content: attr(data-itemsnumber);
+    font-size: 12px;
+    position: absolute;
+    top: 0px;
+    right: -16px;
+    background: var(--white-color);
+    padding: 0 5px;
+    color: var(--black-color);
+    text-align: center;
+    border-radius: 24px;
+    height: 25px;
+    width: 25px;
+    line-height: 25px;
+}
+
+.cart-button.receive-item {
+    animation: shock .4s ease-in-out forwards;
+}
+
+@keyframes shock{
+    10%, 90% {
+      transform: translate3d(-1px, 0, 0);
+    }
+    
+    20%, 80% {
+      transform: translate3d(2px, 0, 0);
+    }
+  
+    30%, 50%, 70% {
+      transform: translate3d(-4px, 0, 0);
+    }
+  
+    40%, 60% {
+      transform: translate3d(4px, 0, 0);
+    }
+}
+
+
 .circle-button {
     height: 45px;
     width: 45px;
@@ -123,9 +166,21 @@ header::after {
     max-width: 50%;
 }
 
+.modal{
+    -webkit-transform: translate3d(0%, 0, 0);
+	-ms-transform: translate3d(0%, 0, 0);
+	-o-transform: translate3d(0%, 0, 0);
+	transform: translate3d(0%, 0, 0);
+}
+
+
 @media only screen and (max-width: 767px) {
     .add-to-chart {
         display: block;
         margin: 0 auto;
     }
-  }
+}
+
+.modal-dialog {
+    max-width: 700px;
+}
