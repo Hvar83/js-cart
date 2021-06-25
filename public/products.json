@@ -5,6 +5,7 @@
     },
     "results": [
         {
+            "id": 1,
             "name": "Triangle",
             "price": 1009.00,
             "discount": null,
@@ -16,6 +17,7 @@
             }
         },
         {
+            "id": 2,
             "name": "Rectangle",
             "price": 899.00,
             "discount": 20,
@@ -27,6 +29,7 @@
             }
         },
         {
+            "id": 3,
             "name": "Circle",
             "price": 999.00,
             "discount": null,
