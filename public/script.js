@@ -8,7 +8,11 @@ $.getJSON("./products.json", function (data) {
 
 function theDomHasLoaded(e) {
     // when DOM is fully loaded
-    const items = JSON.parse(localStorage.getItem("cart"));
+    let items = localStorage.getItem("cart");
+    if (items == null) { items = []; }
+    else { 
+        items = JSON.parse(items);
+     }
 
     let totalItems = 0;
         items.forEach(item => {
@@ -92,7 +96,7 @@ $(document).ready(function(){
         const itemInfoQuantity = $(this).data('quantity');
         const totalProducts = cart.attr('data-itemsnumber'); // check attribute totalitems in cart button
         const newCartTotal = parseInt(totalProducts) - itemInfoQuantity; // update number of items
-        shoppingCart.remove(itemInfoCode);
+        shoppingCart.remove(itemInfoCode, $(this));
 
         setTimeout(function(){
             cart.addClass('receive-item').attr('data-itemsnumber', newCartTotal); // add class receive-item (move the element as shake) to cart
@@ -105,8 +109,6 @@ $(document).ready(function(){
 
 /* CART FUNCTIONALITIES */
 var shoppingCart = {
-    productsList : null, // list of products
-    cartItems : null, // list of cart items
     items : [], // Current items in cart
 
     save: function () {
@@ -115,7 +117,7 @@ var shoppingCart = {
         } else {
             $('#no-items').remove();
         }
-        
+
         localStorage.setItem("cart", JSON.stringify(shoppingCart.items));
     },
     
@@ -250,10 +252,18 @@ var shoppingCart = {
     },
     
     // REMOVE ITEM FROM CART
-    remove : function (id) {
+    remove : function (id, el) {
         shoppingCart.items = shoppingCart.items.filter(item => item.code !== id);
-        shoppingCart.save();
-        shoppingCart.list();
+        shoppingCart.loading(el, 'delete');
+        setTimeout(function(){
+            shoppingCart.save();
+            shoppingCart.list();
+        },500)
+    },
+
+    loading : function(el, action) {
+        el.parent().parent().addClass('opacity03');
+        el.parent().parent().prepend('<div id="loader" class="loader"</div>');
     },
     
     // CHECKOUT
