@@ -105,6 +105,16 @@ $(document).ready(function(){
             },200)
         },600)
     })
+
+    $(document).on('click', '#modify-quantity' , function() {
+        const classStatus = $(this).hasClass('decrement');
+        const itemInfoCode = $(this).data('code');
+        if (classStatus) {
+            shoppingCart.change('decrement', itemInfoCode, $(this))
+        } else {
+            shoppingCart.change('incremenet', itemInfoCode, $(this))
+        }
+    })  
 })
 
 /* CART FUNCTIONALITIES */
@@ -171,8 +181,12 @@ var shoppingCart = {
         `
         <div class="container fluid cart-list-items">
         `;
+        let decrementButton, incrementButton = ``;
         shoppingCart.items.forEach(cartProduct => {
             subtotal = cartProduct.quantity * cartProduct.price;
+            decrementButton, incrementButton = ``;
+            decrementButton = cartProduct.quantity > 1 ? `<button id="modify-quantity" class="modify-quantity decrement background-black" data-code=${cartProduct.code}><span>-</span></button>` : ``;
+            incrementButton = cartProduct.quantity > 0 ? `<button id="modify-quantity" class="modify-quantity increment background-black" data-code=${cartProduct.code}><span>+</span></button>` : ``;
             cartList +=
             `
             <div class="row cart-item border-bottom-gray">
@@ -182,11 +196,11 @@ var shoppingCart = {
                 <div class="col-md-4 text-center">
                     ${cartProduct.name}
                 </div>
-                <div class="col-md-4 text-center">
-                    ${cartProduct.quantity}
+                <div class="col-md-4 text-end">
+                   ${decrementButton} ${cartProduct.quantity} ${incrementButton}
                 </div>
                 <div class="col-md-2 text-center">
-                    ${subtotal} €
+                     ${subtotal} €
                 </div>
                 <div class="col-md-1 text-center">
                     <div id="delete-product" class="circle-button background-white border-white" data-code="${cartProduct.code}" data-quantity=${cartProduct.quantity}>
@@ -198,6 +212,7 @@ var shoppingCart = {
        
             totalQuantity += cartProduct.quantity;
             total += subtotal;
+
         })
 
         $('.cart-button').data('data-itemsnumber', totalQuantity);
@@ -220,6 +235,7 @@ var shoppingCart = {
             </div>
         </div>
         `;
+
         $('.modal-body').append(cartList);
     }
     },
@@ -241,33 +257,64 @@ var shoppingCart = {
     },
 
     // CHANGE QUANTITY
-    change : function () {
-        if (this.value == 0) {
-            delete shoppingCart.items[this.dataset.id];
-        } else {
-            shoppingCart.items[this.dataset.id] = this.value;
+    change : function (action, id, el) {
+        const timeout = 0;
+        let totalItems = 0;
+        shoppingCart.items.forEach((element, index) => {
+            if  (element.code === id) {
+                if (shoppingCart.items[index].quantity > 1) {
+                    action === 'decrement' ? shoppingCart.items[index].quantity-- : shoppingCart.items[index].quantity++;
+                } else {
+                    if (shoppingCart.items[index].quantity === 1) {
+                        shoppingCart.items[index].quantity++;
+                    }
+                }
+            }
+            totalItems += shoppingCart.items[index].quantity;
+        });
+
+        $('.circle-button').attr('data-itemsnumber', totalItems);
+
+        if (timeout >= 0) {
+            clearTimeout(timeout);
         }
-        shoppingCart.save();
-        shoppingCart.list();
+
+        timeout = setTimeout(() => {
+            shoppingCart.loading(el);
+            setTimeout(() => {
+                shoppingCart.save();
+                shoppingCart.list();
+                shoppingCart.disableCheckout(false);
+            }, 500)
+        }, 1000);
     },
     
     // REMOVE ITEM FROM CART
     remove : function (id, el) {
         shoppingCart.items = shoppingCart.items.filter(item => item.code !== id);
         shoppingCart.loading(el, 'delete');
-        setTimeout(function(){
+        setTimeout(() =>{
             shoppingCart.save();
             shoppingCart.list();
+            shoppingCart.disableCheckout(false);
         },500)
     },
 
-    loading : function(el, action) {
-        el.parent().parent().addClass('opacity03');
-        el.parent().parent().prepend('<div id="loader" class="loader"</div>');
+    loading : function(el) {
+        shoppingCart.disableCheckout(true);
+        el.parent().parent().parent().prepend('<div class="mask-loader"><div id="loader" class="loader"</div></div>');
+    },
+
+    disableCheckout: function(status) {
+        if (status) {
+            $('#checkout').attr("disabled", "disabled");
+        } else {
+            $('#checkout').removeAttr("disabled", "disabled");
+        }
     },
     
     // CHECKOUT
-    checkout : function () {
-    alert("TO DO");
+    checkout : function() {
+        alert("TO DO");
     }
 };
