@@ -102,6 +102,7 @@ header::after {
 
 .header-description {
     font-family: 'Courgette', cursive;
+    font-size: 1.2rem;
 }
 
 .cart {
@@ -258,6 +259,10 @@ header::after {
     left: 0;
 }
 
+.modal-content {
+    min-height: 30vh;
+}
+
 .delete-product {
     color: var(--red-color)
 }
@@ -289,4 +294,8 @@ header::after {
     height: 4rem;
     line-height: 4rem;
 } 
+
+.no-items {
+    font-size: 1rem;
+}
 

@@ -14,6 +14,10 @@ function theDomHasLoaded(e) {
         items.forEach(item => {
             totalItems += item.quantity;
         })
+
+    if (totalItems > 0) {
+        $('#no-items').remove();
+    }    
     $('.circle-button').attr('data-itemsnumber', totalItems);
 }
 
@@ -81,6 +85,22 @@ $(document).ready(function(){
             },200)
         },600)
     })
+
+    $(document).on('click', '#delete-product' , function() { // click delete product 
+        const cart = $('.cart-button'); 
+        const itemInfoCode = $(this).data('code');
+        const itemInfoQuantity = $(this).data('quantity');
+        const totalProducts = cart.attr('data-itemsnumber'); // check attribute totalitems in cart button
+        const newCartTotal = parseInt(totalProducts) - itemInfoQuantity; // update number of items
+        shoppingCart.remove(itemInfoCode);
+
+        setTimeout(function(){
+            cart.addClass('receive-item').attr('data-itemsnumber', newCartTotal); // add class receive-item (move the element as shake) to cart
+            setTimeout(function(){
+              cart.removeClass('receive-item'); // remove class after 200ms
+            },200)
+        },600)
+    })
 })
 
 /* CART FUNCTIONALITIES */
@@ -90,6 +110,12 @@ var shoppingCart = {
     items : [], // Current items in cart
 
     save: function () {
+        if (shoppingCart.items.length === 0) {
+            $('header .cart').prepend('<div id="no-items" class="no-items header-description d-inline-block">No items inside cart</div>');
+        } else {
+            $('#no-items').remove();
+        }
+        
         localStorage.setItem("cart", JSON.stringify(shoppingCart.items));
     },
     
@@ -125,7 +151,6 @@ var shoppingCart = {
     },
 
     list : function () {
-    $('.no-items').remove();
     $('.cart-list-items').remove();
     let empty = true;
     if (shoppingCart.items.length !== 0) {
@@ -134,7 +159,7 @@ var shoppingCart = {
 
     // CART IS EMPTY
     if (empty) {
-        $('header .cart').append('<div class="no-items header-description d-inline-block">No items inside cart</div>"');
+        $('.modal-body').append('<span class="description d-block text-center">Cart is empty</span>');
     }
     
     // CART IS NOT EMPTY - LIST ITEMS
@@ -162,7 +187,7 @@ var shoppingCart = {
                     ${subtotal} €
                 </div>
                 <div class="col-md-1 text-center">
-                    <div class="circle-button background-white border-white">
+                    <div id="delete-product" class="circle-button background-white border-white" data-code="${cartProduct.code}" data-quantity=${cartProduct.quantity}>
                         <span class="oi oi-trash color-red lh35 delete-product" alt="delete product" title="delete product"></span>
                     </div>
                 </div>
@@ -215,20 +240,20 @@ var shoppingCart = {
 
     // CHANGE QUANTITY
     change : function () {
-    if (this.value == 0) {
-        delete shoppingCart.items[this.dataset.id];
-    } else {
-        shoppingCart.items[this.dataset.id] = this.value;
-    }
-    shoppingCart.save();
-    shoppingCart.list();
+        if (this.value == 0) {
+            delete shoppingCart.items[this.dataset.id];
+        } else {
+            shoppingCart.items[this.dataset.id] = this.value;
+        }
+        shoppingCart.save();
+        shoppingCart.list();
     },
     
     // REMOVE ITEM FROM CART
-    remove : function () {
-    delete shoppingCart.items[this.dataset.id];
-    shoppingCart.save();
-    shoppingCart.list();
+    remove : function (id) {
+        shoppingCart.items = shoppingCart.items.filter(item => item.code !== id);
+        shoppingCart.save();
+        shoppingCart.list();
     },
     
     // CHECKOUT
