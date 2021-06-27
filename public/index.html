@@ -21,7 +21,7 @@
 </head>
 
 <body>
-  <header>
+  <header> <!-- header container logo and cart button -->
     <div class="container fluid">
       <div class="row">
           <div class="col-md-8 col-sm-8 col-8 logo">
@@ -29,7 +29,7 @@
             <span class="header-description d-none d-sm-none d-md-inline-block">The most definitive shape shop in the world</span>
           </div>
           <div class="col-md-4 col-sm-4 col-4 text-right cart">
-            <div id="no-items" class="no-items header-description d-inline-block">No items inside cart</div>
+            <div id="no-items" class="no-items header-description d-none d-sm-none d-md-inline-block">No items inside cart</div>
             <div class="circle-button background-black lh35 cart-button" data-itemsnumber="0">
               <span class="oi oi-cart lh35"></span>
             </div>
@@ -40,7 +40,7 @@
 
     <div class="container">
       <div class="row">
-        <div class="col-md-8 offset-md-2 col-sm-12 list-items"> 
+        <div class="col-md-8 offset-md-2 col-sm-12 list-items"> <!-- item list populated by the items coming from js code-->
         </div>
       </div>
     </div>
@@ -49,7 +49,7 @@
         <div class="modal-content">
           <div class="modal-header text-center">
             <span class="header-description">Shopping Cart</span>
-            <button type="button" class="close circle-button background-black float-end" data-dismiss="modal"><span class="icomoon icon-cancel-circle"></span></button>
+            <button type="button" class="close position-relative circle-button background-black float-end" data-dismiss="modal"><span class="icon-close"></span></button>
           </div>
           <div class="modal-body">
           </div>

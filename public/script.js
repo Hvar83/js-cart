@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", theDomHasLoaded, false);
 window.addEventListener("load", pageFullyLoaded, false);
   
-
+// load info from products.json
 $.getJSON("./products.json", function (data) {
     loadProductList(data);
 });
@@ -58,29 +58,30 @@ function loadProductList(result) {
     $('.list-items').append(productList);
 }
 
-/* CLICK EVENTS ON HTML ELEMENTS*/ 
-
+/*** EVENTS ON HTML ELEMENTS ***/ 
 $(document).ready(function(){
-    $('.cart-button').click(function() { // click cart button
+    // click cart button in header
+    $('.cart-button').click(function() {
         $('.modal').prop('class', 'modal fade') // add classes modal and fade on modal
         shoppingCart.init();
         $('.modal').modal('show'); // show modal
     });
 
-    $(document).on('click', '#add' , function() { // click add button (ADD TO CART)
-        var cart = $('.cart-button'); 
-        var itemInfoCode = $(this).data('code');
-        var itemInfoName = $(this).data('name');
-        var itemInfoPrice = $(this).data('price'); 
-        var itemInfoImage = $(this).data('image'); 
-        var item = {
+    // click add button (ADD TO CART)
+    $(document).on('click', '#add' , function() {
+        const cart = $('.cart-button'); 
+        const itemInfoCode = $(this).data('code');
+        const itemInfoName = $(this).data('name');
+        const itemInfoPrice = $(this).data('price'); 
+        const itemInfoImage = $(this).data('image'); 
+        const item = {
             'code': itemInfoCode,
             'name': itemInfoName,
             'price': itemInfoPrice,
             'image': itemInfoImage
         }
-        var totalProducts = cart.attr('data-itemsnumber'); // check attribute totalitems in cart button
-        var newCartTotal = parseInt(totalProducts) + 1; // update number of items
+        const totalProducts = cart.attr('data-itemsnumber'); // check attribute totalitems in cart button
+        const newCartTotal = parseInt(totalProducts) + 1; // update number of items
         shoppingCart.add(item)
         setTimeout(function(){
             cart.addClass('receive-item').attr('data-itemsnumber', newCartTotal); // add class receive-item (move the element as shake) to cart
@@ -90,7 +91,8 @@ $(document).ready(function(){
         },600)
     })
 
-    $(document).on('click', '#delete-product' , function() { // click delete product 
+    // click delete product 
+    $(document).on('click', '#delete-product' , function() {
         const cart = $('.cart-button'); 
         const itemInfoCode = $(this).data('code');
         const itemInfoQuantity = $(this).data('quantity');
@@ -106,181 +108,196 @@ $(document).ready(function(){
         },600)
     })
 
-    $(document).on('click', '#modify-quantity' , function() {
-        const classStatus = $(this).hasClass('decrement');
+    $(document).on('change', '#modify-quantity' , function() {
+        const value = parseInt($(this).val());
         const itemInfoCode = $(this).data('code');
-        if (classStatus) {
-            shoppingCart.change('decrement', itemInfoCode, $(this))
-        } else {
-            shoppingCart.change('incremenet', itemInfoCode, $(this))
-        }
-    })  
+        shoppingCart.change(itemInfoCode, $(this), value);
+    })
+
+    // click delete empty cart button
+    $(document).on('click', '#delete-all' , function() { // click delete product 
+        const cart = $('.cart-button'); 
+        shoppingCart.empty($(this));
+
+        setTimeout(function(){
+            cart.addClass('receive-item').attr('data-itemsnumber', 0); // add class receive-item (move the element as shake) to cart
+            setTimeout(function(){
+              cart.removeClass('receive-item'); // remove class after 200ms
+            },200)
+        },600)
+    })
 })
 
-/* CART FUNCTIONALITIES */
+/*** CART FUNCTIONALITIES ***/
 var shoppingCart = {
     items : [], // Current items in cart
 
+    /*FUNCTION SAVE CART ITEMS */
     save: function () {
         if (shoppingCart.items.length === 0) {
-            $('header .cart').prepend('<div id="no-items" class="no-items header-description d-inline-block">No items inside cart</div>');
+            $('header .cart').prepend('<div id="no-items" class="no-items header-description d-none d-sm-none d-md-inline-block">No items inside cart</div>');
         } else {
             $('#no-items').remove();
         }
 
-        localStorage.setItem("cart", JSON.stringify(shoppingCart.items));
+        localStorage.setItem("cart", JSON.stringify(shoppingCart.items)); // save in localStorage
     },
     
+    /* FUNCTION LOAD CART ITEMS */
     load: function () {
     $('.modal-body').remove('.cart-list-items');    
     shoppingCart.items = localStorage.getItem("cart");
-    if (shoppingCart.items == null) { shoppingCart.items = []; }
+    if (shoppingCart.items == null) { shoppingCart.items = []; } // if localStorage doesn't have any item "cart", items are empty array
     else { 
         shoppingCart.items = JSON.parse(shoppingCart.items);
      }
     },
     
-    // NUKE CART!
-    nuke: function () {
-    if (confirm("Empty cart?")) {
-        shoppingCart.items = {};
-        localStorage.removeItem("cart");
-        shoppingCart.list();
-      }
+    /* FUNCTION EMPTY CART */
+    empty: function (el) {
+        shoppingCart.items = []; // array of items empty
+        shoppingCart.loading(el); // calling function loading effect
+        setTimeout(() =>{
+            shoppingCart.save();
+            shoppingCart.list();
+            shoppingCart.disableCheckout(false);
+        },500)
     },
 
+    /* FUNCTION INIT CART */
     init : function () {
-    // GET HTML ELEMENTS
-    $('.modal-body').remove('.cart-list-items');
-    shoppingCart.cartItems = localStorage.getItem("cart");
-    
-    
-    // LOAD CART FROM PREVIOUS SESSION
-    shoppingCart.load();
-    
-    // LIST CURRENT CART ITEMS
-    shoppingCart.list();
+        $('.modal-body').remove('.cart-list-items');
+        shoppingCart.cartItems = localStorage.getItem("cart");
+        shoppingCart.load(); // load items
+        shoppingCart.list(); // create html list of items
     },
 
+    /* FUNCTION LIST CART ITEMS */
     list : function () {
-    $('.cart-list-items').remove();
-    let empty = true;
-    if (shoppingCart.items.length !== 0) {
-        empty = false;
-    }
+        // remove html messages
+        $('.cart-list-items').remove();
+        $('.cart-empty').remove();
+        $('.delete-all').remove();
 
-    // CART IS EMPTY
-    if (empty) {
-        $('.modal-body').append('<span class="description d-block text-center">Cart is empty</span>');
-    }
-    
-    // CART IS NOT EMPTY - LIST ITEMS
-    else {
-        totalQuantity = 0, total = 0, subtotal = 0;
-        let cartList = 
-        `
-        <div class="container fluid cart-list-items">
-        `;
-        let decrementButton, incrementButton = ``;
-        shoppingCart.items.forEach(cartProduct => {
-            subtotal = cartProduct.quantity * cartProduct.price;
-            decrementButton, incrementButton = ``;
-            decrementButton = cartProduct.quantity > 1 ? `<button id="modify-quantity" class="modify-quantity decrement background-black" data-code=${cartProduct.code}><span>-</span></button>` : ``;
-            incrementButton = cartProduct.quantity > 0 ? `<button id="modify-quantity" class="modify-quantity increment background-black" data-code=${cartProduct.code}><span>+</span></button>` : ``;
-            cartList +=
+        // check if cart is empty
+        let empty = true;
+        if (shoppingCart.items.length !== 0) {
+            empty = false;
+        }
+
+        if (empty) {
+            $('.modal-body').append('<span class="cart-empty description d-block text-center">Cart is empty</span>');
+        }
+        
+        // if it's not empty add html elements
+        else {
+            totalQuantity = 0, total = 0, subtotal = 0;
+            let selectOptionsQuantity = ``;
+            let cartList = 
             `
-            <div class="row cart-item border-bottom-gray">
-                <div class="col-md-1 text-center">
-                    <img src="./assets/img/${cartProduct.image}" alt="image" />
+            <div class="container fluid cart-list-items">
+            `;
+            shoppingCart.items.forEach(cartProduct => {
+                subtotal = cartProduct.quantity * cartProduct.price;
+                selectOptionsQuantity =
+                `<select id="modify-quantity" class="" data-code=${cartProduct.code}>`;
+                for(let i = 1; i <= 20; i++) {
+                    if (i === cartProduct.quantity) {
+                        selectOptionsQuantity += '<option value="' + i +'" selected="selected">' + i +'</option>';  
+                    } else {
+                        selectOptionsQuantity += '<option value="' + i +'">' + i +'</option>';  
+                    }
+                }
+                selectOptionsQuantity += `</select>`;
+                cartList +=
+                `
+                <div class="row cart-item border-bottom-gray">
+                    <div class="col-md-1 col-sm-12 text-center ptb-sm-2">
+                        <img src="./assets/img/${cartProduct.image}" alt="image" />
+                    </div>
+                    <div class="col-md-4 col-sm-12 text-center ptb-sm-2">
+                        ${cartProduct.name}
+                    </div>
+                    <div class="col-md-2 col-sm-12 text-md-end text-center ptb-sm-2">
+                    ${selectOptionsQuantity}
+                    </div>
+                    <div class="col-md-3 col-sm-12 text-md-end text-center ptb-sm-2 position-relative">
+                        ${subtotal} €
+                        <span class="unit-price">Unit price: ${cartProduct.price} €</span>
+                    </div>
+                    <div class="col-md-2 col-sm-12 buttons-cart d-flex text-center align-items-center justify-content-end ptb-sm-2">
+                        <div id="delete-product" class="remove-item" data-code="${cartProduct.code}" data-quantity=${cartProduct.quantity}>
+                            <span class="oi oi-trash"></span>
+                        </div>
+                    </div>
                 </div>
-                <div class="col-md-4 text-center">
-                    ${cartProduct.name}
-                </div>
-                <div class="col-md-4 text-end">
-                   ${decrementButton} ${cartProduct.quantity} ${incrementButton}
-                </div>
-                <div class="col-md-2 text-center">
-                     ${subtotal} €
-                </div>
-                <div class="col-md-1 text-center">
-                    <div id="delete-product" class="circle-button background-white border-white" data-code="${cartProduct.code}" data-quantity=${cartProduct.quantity}>
-                        <span class="oi oi-trash color-red lh35 delete-product" alt="delete product" title="delete product"></span>
+                `;    
+        
+                totalQuantity += cartProduct.quantity;
+                total += subtotal;
+
+            })
+
+            $('.cart-button').data('data-itemsnumber', totalQuantity);
+            cartList += `
+            <div class="row total">
+                <div class="col-md-6 col-sm-12 offset-md-6 text-right background-gray mt20">
+                    <div class="row mb10">
+                        <div class="col-md-8 col-sm-12 text-md-start text-center text-uppercase">Items:</div>
+                        <div class="col-md-4 col-sm-12 text-md-end text-center">${totalQuantity}</div>
+                    </div>
+                    <div class="row mb20">
+                        <div class="col-md-8 col-sm-12 text-md-start text-center text-uppercase">Total:</div>
+                        <div class="col-md-4 col-sm-12 text-md-end text-center">${total} €</div>
                     </div>
                 </div>
             </div>
-            `;    
-       
-            totalQuantity += cartProduct.quantity;
-            total += subtotal;
-
-        })
-
-        $('.cart-button').data('data-itemsnumber', totalQuantity);
-        cartList += `
-        <div class="row total">
-            <div class="col-md-6 offset-md-6 text-right background-gray mt20">
-                <div class="row mb10">
-                    <div class="col-md-8 col-sm-12 text-md-start text-center text-uppercase">Items:</div>
-                    <div class="col-md-4 col-sm-12 text-md-end text-center">${totalQuantity}</div>
-                </div>
-                <div class="row mb20">
-                    <div class="col-md-8 col-sm-12 text-md-start text-center text-uppercase">Total:</div>
-                    <div class="col-md-4 col-sm-12 text-md-end text-center">${total} €</div>
+            <div class="row">
+                <div class="mt10 col-md-3 col-sm-12 offset-md-9 text-md-end text-center">
+                    <button id="checkout" class="checkout background-black">CHECKOUT</button>
                 </div>
             </div>
-        </div>
-        <div class="row">
-            <div class="mt10 col-md-3 offset-md-9 text-md-end text-center">
-                <button id="checkout" class="checkout background-black">CHECKOUT</button>
-            </div>
-        </div>
-        `;
+            `;
 
-        $('.modal-body').append(cartList);
-    }
+            $('.modal-body').append(cartList);
+            if (total > 0) { // check if cart has elements and add delete all button
+                $('.cart-list-items').prepend('<div class="d-flex flex-column align-items-end"><div id="delete-all" class="delete-all"><span class="oi oi-trash"></span>Delete all</div></div>')
+            }
+        }
     },
 
+    /* FUNCTION ADD ELEMENT TO CART */
     add : function (product) {
         let found = false;
-        for (var i in shoppingCart.items) {
-            if (shoppingCart.items[i].code === product.code) {
+        for (var i in shoppingCart.items) { // loop inside cart items 
+            if (shoppingCart.items[i].code === product.code) { // if item to add is there, update the quantity
                 shoppingCart.items[i].quantity++;
                 found = true;
+                break; // if found it, stop loop
             } else {
-                found = false;
+                found = false; 
             }
         }
         
-        if(!found) {shoppingCart.items.push({...product, 'quantity': 1})} 
+        if(!found) {shoppingCart.items.push({...product, 'quantity': 1})} // if item doesn't exist in cart, add new line with quantity 1
 
         shoppingCart.save();
     },
 
-    // CHANGE QUANTITY
-    change : function (action, id, el) {
-        const timeout = 0;
+    /* FUNCTION CHANGE QUANTITY ITEM */
+    change : function (id, el, value) {
         let totalItems = 0;
-        shoppingCart.items.forEach((element, index) => {
+        shoppingCart.items.forEach((element, index) => { // checking items 
             if  (element.code === id) {
-                if (shoppingCart.items[index].quantity > 1) {
-                    action === 'decrement' ? shoppingCart.items[index].quantity-- : shoppingCart.items[index].quantity++;
-                } else {
-                    if (shoppingCart.items[index].quantity === 1) {
-                        shoppingCart.items[index].quantity++;
-                    }
-                }
+                shoppingCart.items[index].quantity = value; // update the item with the new quantity
             }
             totalItems += shoppingCart.items[index].quantity;
         });
 
         $('.circle-button').attr('data-itemsnumber', totalItems);
 
-        if (timeout >= 0) {
-            clearTimeout(timeout);
-        }
-
         timeout = setTimeout(() => {
-            shoppingCart.loading(el);
+            shoppingCart.loading(el); // calling function loading effect
             setTimeout(() => {
                 shoppingCart.save();
                 shoppingCart.list();
@@ -289,10 +306,10 @@ var shoppingCart = {
         }, 1000);
     },
     
-    // REMOVE ITEM FROM CART
+    /* FUNCTION REMOVE ITEM FROM THE CART */
     remove : function (id, el) {
-        shoppingCart.items = shoppingCart.items.filter(item => item.code !== id);
-        shoppingCart.loading(el, 'delete');
+        shoppingCart.items = shoppingCart.items.filter(item => item.code !== id); // filter array with element with code !== id
+        shoppingCart.loading(el); // calling function loading effect
         setTimeout(() =>{
             shoppingCart.save();
             shoppingCart.list();
@@ -300,9 +317,14 @@ var shoppingCart = {
         },500)
     },
 
+    /* LOADING EFFECT */
     loading : function(el) {
         shoppingCart.disableCheckout(true);
-        el.parent().parent().parent().prepend('<div class="mask-loader"><div id="loader" class="loader"</div></div>');
+        if (el.hasClass('delete-all')) {
+            el.parent().prepend('<div class="mask-loader"><div id="loader" class="loader"</div></div>'); // add mask-load as first-child of parent
+        } else {
+            el.parent().parent().parent().prepend('<div class="mask-loader"><div id="loader" class="loader"</div></div>');
+        }
     },
 
     disableCheckout: function(status) {
@@ -313,8 +335,8 @@ var shoppingCart = {
         }
     },
     
-    // CHECKOUT
+    /* CHECKOUT */
     checkout : function() {
-        alert("TO DO");
+        alert("now you have to pay!!");
     }
 };
